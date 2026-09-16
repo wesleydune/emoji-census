@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "emoji-census"
+version = "0.1.0"
+description = "Tally emoji sequences in text streams without loading the input into memory"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "wesleydune" }]
+
+[project.scripts]
+emoji-census = "emoji_census.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["emoji_census*"]

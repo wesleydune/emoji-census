@@ -61,6 +61,12 @@ TAG_TERMINATOR = 0xE007F
 
 
 def is_emoji_base(codepoint):
+    # Skin tone modifiers fall inside the broad 0x1F000-0x1FFFF catch-all
+    # above but only ever mean anything attached to a preceding base; a
+    # stray one (no base before it, or right after a ZWJ) isn't a sequence
+    # of its own.
+    if SKIN_TONE_START <= codepoint <= SKIN_TONE_END:
+        return False
     return any(start <= codepoint <= end for start, end in EMOJI_RANGES)
 
 

@@ -56,6 +56,20 @@ Output is tab-separated: count, the sequence itself, then its codepoints
 in `U+XXXX` form (useful when your terminal or font can't render
 something, or when you need to paste an exact sequence somewhere else).
 
+For machine-readable output, pass `--json`:
+
+```
+$ python -m emoji_census.cli --json chat_log.txt
+[
+  {
+    "sequence": "👍🏽",
+    "count": 41,
+    "codepoints": ["U+1F44D", "U+1F3FD"]
+  },
+  ...
+]
+```
+
 ## installing
 
 No third-party dependencies -- the standard library is enough. To get the

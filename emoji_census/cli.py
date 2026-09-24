@@ -1,5 +1,6 @@
 import argparse
 import collections
+import json
 import sys
 
 from . import scanner
@@ -25,9 +26,21 @@ def _open_inputs(paths):
             yield fileobj
 
 
+def _codepoint_names(sequence):
+    return ["U+%04X" % ord(c) for c in sequence]
+
+
 def _format_row(sequence, count):
-    codepoints = " ".join("U+%04X" % ord(c) for c in sequence)
+    codepoints = " ".join(_codepoint_names(sequence))
     return "%d\t%s\t%s" % (count, sequence, codepoints)
+
+
+def _format_json(tally, top):
+    rows = [
+        {"sequence": sequence, "count": count, "codepoints": _codepoint_names(sequence)}
+        for sequence, count in tally.most_common(top)
+    ]
+    return json.dumps(rows, ensure_ascii=False, indent=2)
 
 
 def main(argv=None):
@@ -50,6 +63,11 @@ def main(argv=None):
         metavar="N",
         help="only show the N most common sequences",
     )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="print results as a JSON array instead of tab-separated rows",
+    )
     args = parser.parse_args(argv)
 
     tally = collections.Counter()
@@ -57,8 +75,11 @@ def main(argv=None):
         for sequence in scanner.iter_sequences(_char_stream(fileobj)):
             tally[sequence] += 1
 
-    for sequence, count in tally.most_common(args.top):
-        print(_format_row(sequence, count))
+    if args.json:
+        print(_format_json(tally, args.top))
+    else:
+        for sequence, count in tally.most_common(args.top):
+            print(_format_row(sequence, count))
 
     return 0
 

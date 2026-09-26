@@ -3,7 +3,7 @@ import collections
 import json
 import sys
 
-from . import scanner
+from . import normalize, scanner
 
 CHUNK_SIZE = 1 << 16  # 64 KiB of text per read, regardless of file size
 
@@ -68,11 +68,21 @@ def main(argv=None):
         action="store_true",
         help="print results as a JSON array instead of tab-separated rows",
     )
+    parser.add_argument(
+        "--normalize",
+        action="store_true",
+        help=(
+            "strip variation selector-16 before counting, so a sequence's "
+            "text-style and emoji-style presentation tally as one"
+        ),
+    )
     args = parser.parse_args(argv)
 
     tally = collections.Counter()
     for fileobj in _open_inputs(args.paths):
         for sequence in scanner.iter_sequences(_char_stream(fileobj)):
+            if args.normalize:
+                sequence = normalize.strip_variation_selectors(sequence)
             tally[sequence] += 1
 
     if args.json:

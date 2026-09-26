@@ -52,6 +52,16 @@ Limit output to the most common sequences:
 $ python -m emoji_census.cli -n 10 huge_corpus.txt
 ```
 
+Some emoji have both a text-style and an emoji-style presentation that
+only differ by a trailing variation selector-16 -- the same umbrella
+comes out as either `☂` or `☂️` depending on what typed it. `--normalize`
+strips that selector before counting so the two presentations tally as
+one sequence instead of splitting the count:
+
+```
+$ python -m emoji_census.cli --normalize chat_log.txt
+```
+
 Output is tab-separated: count, the sequence itself, then its codepoints
 in `U+XXXX` form (useful when your terminal or font can't render
 something, or when you need to paste an exact sequence somewhere else).

@@ -62,5 +62,43 @@ class JsonOutputTests(unittest.TestCase):
         self.assertEqual(json.loads(output), [])
 
 
+class NormalizeFlagTests(unittest.TestCase):
+    def _run(self, args):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            cli.main(args)
+        return out.getvalue()
+
+    def test_normalize_merges_text_and_emoji_style_presentations(self):
+        text_style = "☂"
+        emoji_style = "☂️"
+        path = _write_temp_file(text_style + emoji_style + emoji_style)
+        try:
+            output = self._run(["--json", "--normalize", path])
+        finally:
+            os.remove(path)
+
+        rows = json.loads(output)
+        self.assertEqual(rows, [
+            {
+                "sequence": text_style,
+                "count": 3,
+                "codepoints": ["U+2602"],
+            }
+        ])
+
+    def test_without_normalize_the_two_presentations_stay_separate(self):
+        text_style = "☂"
+        emoji_style = "☂️"
+        path = _write_temp_file(text_style + emoji_style)
+        try:
+            output = self._run(["--json", path])
+        finally:
+            os.remove(path)
+
+        rows = json.loads(output)
+        self.assertEqual(len(rows), 2)
+
+
 if __name__ == "__main__":
     unittest.main()
